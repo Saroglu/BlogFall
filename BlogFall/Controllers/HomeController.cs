@@ -28,9 +28,11 @@ namespace BlogFall.Controllers
                 @ViewBag.SubTitle = cat.CategoryName;
                 result = result.Where(x => x.CategoryId == cid);
             }
+            ViewBag.page = page;
+            ViewBag.pageCount = Math.Ceiling(result.Count() / (decimal)pageSize);
             ViewBag.nextPage = page + 1;
-            ViewBag.prevPage = page - 1;
-
+            ViewBag.prevPage = page - 1 <2 ? 1 : page-1;
+            ViewBag.cid = cid;
             return View(result.OrderByDescending(x=> x.CreateTime).Skip((page-1)*pageSize).Take(pageSize).ToList());
         }
 
