@@ -4,11 +4,13 @@
     ViewBag.HeaderTitle = "Yazılar";
 }
 
-<h2>Yazılar</h2>
+
 
 <div class="card">
     <div class="card-header">
-        <h3 class="card-title">Yazıları Listele</h3>
+        <a href="@Url.Action("New","Posts")" class="btn btn-sm btn-primary"><i class="fas fa-plus"></i>
+        Yeni Yazı
+        </a>
     </div>
     <!-- /.card-header -->
     <div class="card-body">
@@ -82,7 +84,8 @@
 @section scripts {
     <script>
         $(function () {
-           var table = $("#example1").DataTable({
+            var table = $("#example1").DataTable({
+               order: [[4, "desc"]],
                 language: {
                     url: "@Url.Content("~/Areas/Admin/plugins/datatables/Turkish.json")"
                 }
@@ -115,7 +118,3 @@
     </script>
 }
 
-<!-- Button trigger modal -->
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
-    Launch demo modal
-</button>
