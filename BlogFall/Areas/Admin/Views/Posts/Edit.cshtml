@@ -12,36 +12,36 @@
 
     <div class="card card-primary card-outline">
         @*<div class="card-header">
-            <h3 class="card-title">Compose New Message</h3>
-        </div>*@
+                <h3 class="card-title">Compose New Message</h3>
+            </div>*@
         <!-- /.card-header -->
         <div class="card-body">
             <div class="row">
                 <div class="col-md-9">
                     <div class="form-group">
-                        @Html.TextBoxFor(x => x.Title, new { @class= "form-control", placeholder="Başlık"})
-                        @Html.ValidationMessageFor(x => x.Title,null, new { @class = "text-danger"})
+                        @Html.TextBoxFor(x => x.Title, new { @class = "form-control", placeholder = "Başlık" })
+                        @Html.ValidationMessageFor(x => x.Title, null, new { @class = "text-danger" })
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="form-group">
-                        @Html.DropDownListFor(x=>x.CategoryId, null, "Kategori Seçiniz", new { @class="form-control"})
-                        @Html.ValidationMessageFor(x=>x.CategoryId, null, new { @class="text-danger"})
+                        @Html.DropDownListFor(x => x.CategoryId, null, "Kategori Seçiniz", new { @class = "form-control" })
+                        @Html.ValidationMessageFor(x => x.CategoryId, null, new { @class = "text-danger" })
                     </div>
                 </div>
             </div>
-            
+
             <div class="form-group">
-                @Html.TextAreaFor(x => x.Content, new { @class = "form-control"})
+                @Html.TextAreaFor(x => x.Content, new { @class = "form-control" })
                 @Html.ValidationMessageFor(x => x.Content, null, new { @class = "text-danger" })
             </div>
             @*<div class="form-group">
-                <div class="btn btn-default btn-file">
-                    <i class="fas fa-paperclip"></i> Attachment
-                    <input type="file" name="attachment">
-                </div>
-                <p class="help-block">Max. 32MB</p>
-            </div>*@
+                    <div class="btn btn-default btn-file">
+                        <i class="fas fa-paperclip"></i> Attachment
+                        <input type="file" name="attachment">
+                    </div>
+                    <p class="help-block">Max. 32MB</p>
+                </div>*@
         </div>
         <!-- /.card-body -->
         <div class="card-footer">
@@ -57,11 +57,44 @@
 }
 
 @section scripts {
-    <script>$(function () {
+    <script>
+        $(function () {
             //Add text editor
-    $('#Content').summernote({ lang: "tr-TR", height: 300, placeholder: "Birşeyler yazınız.." });
+            $('#Content').summernote({
+                lang: "tr-TR",
+                height: 300,
+                placeholder: "Birşeyler yazınız..",
+                callbacks: {
+                    onImageUpload: function (files) {
+                        uploadFile(files[0]);
+                    }
+                }
+            });
+
+            function uploadFile(file) {
+                var formData = new FormData();
+                formData.append("file", file);
+
+                $.ajax({
+                    type: 'POST',
+                    url: "@Url.Action("AjaxImageUpload","Posts")",
+                    data: formData,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: function (data) {
+                        $('#Content').summernote("insertImage", data.url);
+                        console.log(data);
+                    },
+                    error: function (data) {
+                        console.log("error");
+                        console.log(data);
+                    }
+                });
+            }
+
         });
     </script>
-    
-    }
+
+}
 

@@ -1,17 +1,22 @@
 ﻿using BlogFall.Areas.Admin.ViewModels;
+using BlogFall.Attributes;
 using BlogFall.Models;
 using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Web;
 using System.Web.Mvc;
 
 namespace BlogFall.Areas.Admin.Controllers
 {
+    [BreadCrumbAttributes("Gönderiler")]
     public class PostsController : AdminBaseController
     {
+        [BreadCrumbAttributes("Indeks")]
         // GET: Admin/Posts
         public ActionResult Index()
         {
@@ -32,6 +37,8 @@ namespace BlogFall.Areas.Admin.Controllers
 
             return Json(new { success = true });
         }
+
+        [BreadCrumbAttributes("Düzenle")]
         public ActionResult Edit(int id)
         {
             ViewBag.CategoryId = new SelectList(db.Categories.ToList(), "Id", "CategoryName");
@@ -47,6 +54,7 @@ namespace BlogFall.Areas.Admin.Controllers
             return View(vm);
         }
 
+        [BreadCrumbAttributes("Düzenle")]
         [HttpPost]
         [ValidateInput(false)]
         [ValidateAntiForgeryToken]
@@ -65,12 +73,14 @@ namespace BlogFall.Areas.Admin.Controllers
             return View();
         }
 
+        [BreadCrumbAttributes("Yeni")]
         public ActionResult New()
         {
             ViewBag.CategoryId = new SelectList(db.Categories.ToList(), "Id", "CategoryName");
             return View("Edit", new PostEditViewModels());
         }
 
+        [BreadCrumbAttributes("Yeni")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         [ValidateInput(false)]
@@ -93,6 +103,23 @@ namespace BlogFall.Areas.Admin.Controllers
         }
         ViewBag.CategoryId = new SelectList(db.Categories.ToList(), "Id", "CategoryName");
             return View("Edit", new PostEditViewModels());
+        }
+
+        [HttpPost]
+        public ActionResult AjaxImageUpload(HttpPostedFileBase file)
+        {
+            if (file==null || file.ContentLength==0 || !file.ContentType.StartsWith("image/"))
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            var saveFolderPath = Server.MapPath("~/Upload/Posts");
+            var ext = Path.GetExtension(file.FileName);
+            var saveFileName = Guid.NewGuid() + ext;
+            var saveFilePath = Path.Combine(saveFolderPath, saveFileName);
+            file.SaveAs(saveFilePath);
+
+            return Json(new { url= Url.Content("~/Upload/Posts/" + saveFileName) });
         }
 }
 }
