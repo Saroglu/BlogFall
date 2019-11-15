@@ -1,4 +1,6 @@
 ﻿using BlogFall.Attributes;
+using BlogFall.Models;
+using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,8 +24,8 @@ namespace BlogFall.Helper
         {
             string controller = htmlHelper.ControllerName();
             Type t = Type.GetType("BlogFall.Areas.Admin.Controllers." + controller + "Controller");
-            object[] attributes= t.GetCustomAttributes(typeof(BreadCrumbAttributes), true);
-            if (attributes.Length ==0)
+            object[] attributes = t.GetCustomAttributes(typeof(BreadCrumbAttributes), true);
+            if (attributes.Length == 0)
             {
                 return controller;
             }
@@ -37,13 +39,13 @@ namespace BlogFall.Helper
             string controller = htmlHelper.ControllerName();
             string action = htmlHelper.ActionName();
             Type t = Type.GetType("BlogFall.Areas.Admin.Controllers." + controller + "Controller");
-            MethodInfo mi= t.GetMethods().FirstOrDefault(x=> x.Name == action);
+            MethodInfo mi = t.GetMethods().FirstOrDefault(x => x.Name == action);
             BreadCrumbAttributes ba = mi.GetCustomAttribute(typeof(BreadCrumbAttributes)) as BreadCrumbAttributes;
 
             if (ba == null)
             {
                 return action;
-                
+
             }
 
             return ba.Name;
@@ -51,16 +53,24 @@ namespace BlogFall.Helper
 
         public static IHtmlString ShowPostIntro(this HtmlHelper htmlHelper, string content)
         {
+            if (string.IsNullOrEmpty(content))
+            {
+                return htmlHelper.Raw("");
+            }
             int pos = content.IndexOf("<hr>");
-            if (pos== -1)
+            if (pos == -1)
             {
                 return htmlHelper.Raw(content);
             }
-           
-            return htmlHelper.Raw(content.Substring(0,pos));
+
+            return htmlHelper.Raw(content.Substring(0, pos));
         }
         public static IHtmlString ShowPost(this HtmlHelper htmlHelper, string content)
         {
+            if (string.IsNullOrEmpty(content))
+            {
+                return htmlHelper.Raw("");
+            }
             int pos = content.IndexOf("<hr>");
             if (pos == -1)
             {
@@ -68,6 +78,26 @@ namespace BlogFall.Helper
             }
 
             return htmlHelper.Raw(content.Remove(pos, 4));
+        }
+        public static string ProfilePhotoPath(this HtmlHelper htmlHelper)
+        {
+            string userId = htmlHelper.ViewContext.HttpContext.User.Identity.GetUserId();
+
+            var urlHelper = new UrlHelper(htmlHelper.ViewContext.RequestContext, htmlHelper.RouteCollection);
+            if (userId != null)
+            {
+                using (var db = new ApplicationDbContext())
+                {
+                    var user = db.Users.Find(userId);
+                    if (user != null && !string.IsNullOrEmpty(user.Photo))
+                    {
+                        return urlHelper.Content("~/Upload/Profiles/"+ user.Photo);
+                    }
+                }
+
+            }
+            return urlHelper.Content("~/Images/avatar.png");
+
         }
     }
 }

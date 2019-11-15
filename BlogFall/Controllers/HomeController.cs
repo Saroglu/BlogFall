@@ -1,4 +1,6 @@
 ﻿using BlogFall.Models;
+using BlogFall.ViewModels;
+using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +11,7 @@ namespace BlogFall.Controllers
 {
     public class HomeController : BaseController
     {
-        public ActionResult Index(int? cid, int page=1)
+        public ActionResult Index(int? cid, string slug, int page=1 )
         {
             int pageSize = 5;
 
@@ -23,6 +25,11 @@ namespace BlogFall.Controllers
                 if (cat==null)
                 {
                     return HttpNotFound();
+                }
+
+                if (cat.Slug != slug)
+                {
+                    return RedirectToRoute("CategoryRoute", new { cid, slug = cat.Slug, page=page });
                 }
 
                 @ViewBag.SubTitle = cat.CategoryName;
@@ -53,14 +60,45 @@ namespace BlogFall.Controllers
         {
             return PartialView("_CategoriesPartial", db.Categories.ToList());
         }
-        public ActionResult ShowPost(int id)
+        public ActionResult ShowPost(int id, string slug)
         {
             Post post = db.Posts.Find(id);
             if (post==null)
             {
                 return HttpNotFound();
             }
+
+            //Eğer adresdeki slug veritabanındaki ile aynı değilse doğrusuna yönlendir.
+            if (post.Slug != slug)
+            {
+                return RedirectToRoute("PostRoute", new { id = id, slug = post.Slug });
+            }
             return View(post);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult SendComment(SendcommentViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                Comment comment = new Comment
+                {
+                    AuthorId = User.Identity.GetUserId(),
+                    AuthorName=model.AuthorName,
+                    AuthorEmail=model.AuthorEmail,
+                    Content=model.Content,
+                    CreateTime=DateTime.Now,
+                    ParentId=model.ParentId,
+                    PostId=model.PostId
+                };
+                db.Comments.Add(comment);
+                db.SaveChanges();
+
+                return Json(comment);
+            }
+            var errorList = ModelState.Values.SelectMany(m => m.Errors).Select(e => e.ErrorMessage).ToList();
+            return Json(new { Errors = errorList });
+            
         }
     }
 }

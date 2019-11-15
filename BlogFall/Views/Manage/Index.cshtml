@@ -11,14 +11,7 @@
     <hr />
 
     <div>
-        @if (string.IsNullOrEmpty(Model.Photo))
-        {
-        <img src="~/Images/avatar.png" height="150"/>
-        }
-        else
-        {
-        <img src="~/Upload/Profiles/@Model.Photo" height="150"  />
-        }
+        <img src="@Html.ProfilePhotoPath()" height="150" />
         <br />
         <a href="@Url.Action("UploadAvatar","Manage")">Resmi Güncelle</a>
     </div>

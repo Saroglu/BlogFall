@@ -1,6 +1,7 @@
 namespace BlogFall.Migrations
 {
     using BlogFall.Models;
+    using BlogFall.Utility;
     using Microsoft.AspNet.Identity;
     using Microsoft.AspNet.Identity.EntityFramework;
     using System;
@@ -19,6 +20,9 @@ namespace BlogFall.Migrations
 
         protected override void Seed(BlogFall.Models.ApplicationDbContext context)
         {
+            var autoGenerateSlugs = false;
+            var autoGenerateSlugAll = false;
+
             #region Admin Rolünü ve Kullanýcýsýný oluþtur
             if (!context.Roles.Any(r => r.Name == "Admin"))
             {
@@ -33,7 +37,7 @@ namespace BlogFall.Migrations
             {
                 var store = new UserStore<ApplicationUser>(context);
                 var manager = new UserManager<ApplicationUser>(store);
-                var user = new ApplicationUser { UserName = "saroglu.erol@gmail.com", Email= "saroglu.erol@gmail.com" };
+                var user = new ApplicationUser { UserName = "saroglu.erol@gmail.com", Email = "saroglu.erol@gmail.com" };
 
                 manager.Create(user, "Erol1.");
                 manager.AddToRole(user.Id, "Admin");
@@ -101,13 +105,13 @@ namespace BlogFall.Migrations
             #endregion
 
             #region Admin Kullanýcýsýna 77 yazý eklenmesi
-            if (!context.Categories.Any(x => x.CategoryName =="Diðer"))
+            if (!context.Categories.Any(x => x.CategoryName == "Diðer"))
             {
                 ApplicationUser admin = context.Users.Where(x => x.UserName == "saroglu.erol@gmail.com").FirstOrDefault();
 
                 if (admin != null)
                 {
-                    if (!context.Categories.Any(x => x.CategoryName =="Diðer"))
+                    if (!context.Categories.Any(x => x.CategoryName == "Diðer"))
                     {
                         Category diger = new Category
                         {
@@ -130,6 +134,29 @@ namespace BlogFall.Migrations
                     }
                 }
             }
+            #endregion
+
+            #region Mevcut kategori ve yazýlarýn slug'larýný oluþtur
+            if (autoGenerateSlugs)
+            {
+                foreach (var item in context.Posts)
+                {
+                    if (autoGenerateSlugAll || string.IsNullOrEmpty(item.Slug))
+                    {
+                        item.Slug = UrlService.URLFriendly(item.Title);
+                    }
+                }
+
+                foreach (var item in context.Categories)
+                {
+                    if (autoGenerateSlugAll || string.IsNullOrEmpty(item.Slug))
+                    {
+                        item.Slug = UrlService.URLFriendly(item.CategoryName);
+                    }
+                }
+            }
+
+
             #endregion
 
         }

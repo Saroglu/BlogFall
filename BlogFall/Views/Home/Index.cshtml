@@ -11,15 +11,20 @@
 {
     <div class="blog-post">
         <h2 class="blog-post-title">
-            <a href="@Url.Action("Showpost", "Home", new { id= item.Id}))" class="text-reset text-decoration-none">
+            <a href="@Url.Action("Showpost", "Home", new { id= item.Id})" class="text-reset text-decoration-none">
                 @item.Title
             </a>
         </h2>
-        <p class="blog-post-meta">@item.CreateTime <a href="#">@item.Author.UserName</a></p>
-    @Html.ShowPostIntro(item.Content)
-        <p class="text-right">
-            <a href="@Url.Action("Showpost", "Home", new { id= item.Id})">Devamını görmek için tıklayınız</a>
+        <p class="blog-post-meta">@item.CreateTime 
+        <a href="#">@item.Author.UserName</a>
+        <a href="@Url.Action("Showpost", "Home", new { id= item.Id} )#comments" ><i class="far fa-comment mr-1" ></i>@item.Comments.Count Yorum</a>
         </p>
+    @Html.ShowPostIntro(item.Content)
+        <div class="d-flex small blog-post-meta-footer">
+            <a href="@Url.Action("Showpost", "Home", new { id= item.Id} )#comments" class="d-inline-block"><i class="far fa-comment mr-1"></i>@item.Comments.Count Yorum</a>
+
+            <a href="@Url.Action("Showpost", "Home", new { id= item.Id})" class="ml-auto d-inline-block">Devamını görmek için tıklayınız</a>       
+        </div>
     </div><!-- /.blog-post -->
 }
 
